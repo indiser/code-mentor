@@ -4,6 +4,8 @@ import { AnalyzeCodeBody, DetectLanguageBody } from "@workspace/api-zod";
 
 const router = Router();
 
+const MODEL = process.env.GEMINI_MODEL ?? "gemini-1.5-flash";
+
 const DEBUG_SYSTEM_PROMPT = `You are a senior software engineer and expert debugger with 20+ years of experience across multiple programming languages. Your job is to analyze code submitted by developers and provide structured, educational feedback.
 
 When analyzing code, you must return a JSON object with EXACTLY these fields:
@@ -27,6 +29,18 @@ Return a JSON object with EXACTLY these fields:
 
 Return ONLY valid JSON. No markdown, no code blocks, no explanation outside the JSON.`;
 
+/**
+ * Extracts the text content from a Gemini response, handling both standard
+ * and thinking-model response shapes, then strips any markdown code fences
+ * the model may have added despite being instructed not to.
+ */
+function extractText(response: { text?: string }): string {
+  const raw = response.text ?? "";
+  // Strip ```json ... ``` or ``` ... ``` wrappers
+  const stripped = raw.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "").trim();
+  return stripped;
+}
+
 router.post("/analyze", async (req, res) => {
   const parseResult = AnalyzeCodeBody.safeParse(req.body);
   if (!parseResult.success) {
@@ -47,7 +61,7 @@ router.post("/analyze", async (req, res) => {
       : `Code to analyze (detect language automatically):\n\`\`\`\n${code}\n\`\`\``;
 
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: MODEL,
       contents: [{ role: "user", parts: [{ text: userPrompt }] }],
       config: {
         systemInstruction: DEBUG_SYSTEM_PROMPT,
@@ -56,7 +70,7 @@ router.post("/analyze", async (req, res) => {
       },
     });
 
-    const rawText = response.text ?? "";
+    const rawText = extractText(response);
 
     let parsed: {
       bug_description: string;
@@ -110,7 +124,7 @@ router.post("/detect-language", async (req, res) => {
 
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: MODEL,
       contents: [{ role: "user", parts: [{ text: `Code snippet:\n\`\`\`\n${code.slice(0, 2000)}\n\`\`\`` }] }],
       config: {
         systemInstruction: DETECT_LANGUAGE_PROMPT,
@@ -119,7 +133,7 @@ router.post("/detect-language", async (req, res) => {
       },
     });
 
-    const rawText = response.text ?? "";
+    const rawText = extractText(response);
 
     let parsed: { language: string; confidence: "high" | "medium" | "low" };
 
