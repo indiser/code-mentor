@@ -66,6 +66,18 @@ export default defineConfig({
     fs: {
       strict: true,
     },
+    // When running outside Replit (e.g. locally or in Codespaces), proxy /api
+    // to the backend server. In Replit, the shared reverse proxy handles this.
+    ...(process.env.REPL_ID
+      ? {}
+      : {
+          proxy: {
+            "/api": {
+              target: `http://localhost:${process.env.API_PORT ?? 8080}`,
+              changeOrigin: true,
+            },
+          },
+        }),
   },
   preview: {
     port,
