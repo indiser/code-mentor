@@ -8,3 +8,63 @@
 export interface HealthStatus {
   status: string;
 }
+
+export interface AnalyzeCodeBody {
+  /** The code snippet to analyze */
+  code: string;
+  /** Programming language (optional, will be auto-detected if omitted) */
+  language?: string;
+}
+
+/**
+ * Severity level of the bug
+ */
+export type AnalyzeCodeResultSeverity =
+  (typeof AnalyzeCodeResultSeverity)[keyof typeof AnalyzeCodeResultSeverity];
+
+export const AnalyzeCodeResultSeverity = {
+  minor: "minor",
+  major: "major",
+  critical: "critical",
+} as const;
+
+export interface AnalyzeCodeResult {
+  /** Detected or provided programming language */
+  language: string;
+  /** Description of the bug(s) found */
+  bug_description: string;
+  /** The corrected version of the code */
+  fixed_code: string;
+  /** Detailed explanation of the root cause */
+  root_cause_explanation: string;
+  /** Severity level of the bug */
+  severity: AnalyzeCodeResultSeverity;
+  /** Tip on how to avoid this type of bug in the future */
+  prevention_tip: string;
+  /** Whether any bugs were detected */
+  has_bugs: boolean;
+}
+
+export interface DetectLanguageBody {
+  /** Code snippet to detect language from */
+  code: string;
+}
+
+export type DetectLanguageResultConfidence =
+  (typeof DetectLanguageResultConfidence)[keyof typeof DetectLanguageResultConfidence];
+
+export const DetectLanguageResultConfidence = {
+  high: "high",
+  medium: "medium",
+  low: "low",
+} as const;
+
+export interface DetectLanguageResult {
+  /** Detected programming language */
+  language: string;
+  confidence: DetectLanguageResultConfidence;
+}
+
+export interface DebugError {
+  error: string;
+}

@@ -14,3 +14,45 @@ import * as zod from "zod";
 export const HealthCheckResponse = zod.object({
   status: zod.string(),
 });
+
+/**
+ * Sends code to AI, returns bug detection, fix, explanation, severity, and prevention tip
+ * @summary Analyze code for bugs using AI
+ */
+export const AnalyzeCodeBody = zod.object({
+  code: zod.string().describe("The code snippet to analyze"),
+  language: zod
+    .string()
+    .optional()
+    .describe(
+      "Programming language (optional, will be auto-detected if omitted)",
+    ),
+});
+
+export const AnalyzeCodeResponse = zod.object({
+  language: zod.string().describe("Detected or provided programming language"),
+  bug_description: zod.string().describe("Description of the bug(s) found"),
+  fixed_code: zod.string().describe("The corrected version of the code"),
+  root_cause_explanation: zod
+    .string()
+    .describe("Detailed explanation of the root cause"),
+  severity: zod
+    .enum(["minor", "major", "critical"])
+    .describe("Severity level of the bug"),
+  prevention_tip: zod
+    .string()
+    .describe("Tip on how to avoid this type of bug in the future"),
+  has_bugs: zod.boolean().describe("Whether any bugs were detected"),
+});
+
+/**
+ * @summary Auto-detect programming language from code snippet
+ */
+export const DetectLanguageBody = zod.object({
+  code: zod.string().describe("Code snippet to detect language from"),
+});
+
+export const DetectLanguageResponse = zod.object({
+  language: zod.string().describe("Detected programming language"),
+  confidence: zod.enum(["high", "medium", "low"]),
+});

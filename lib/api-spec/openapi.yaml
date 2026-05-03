@@ -10,6 +10,8 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: debug
+    description: Code debugging and analysis operations
 paths:
   /healthz:
     get:
@@ -24,6 +26,61 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /debug/analyze:
+    post:
+      operationId: analyzeCode
+      tags: [debug]
+      summary: Analyze code for bugs using AI
+      description: Sends code to AI, returns bug detection, fix, explanation, severity, and prevention tip
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AnalyzeCodeBody"
+      responses:
+        "200":
+          description: Analysis result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnalyzeCodeResult"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DebugError"
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DebugError"
+  /debug/detect-language:
+    post:
+      operationId: detectLanguage
+      tags: [debug]
+      summary: Auto-detect programming language from code snippet
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DetectLanguageBody"
+      responses:
+        "200":
+          description: Detected language
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DetectLanguageResult"
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DebugError"
 components:
   schemas:
     HealthStatus:
@@ -33,4 +90,74 @@ components:
           type: string
       required:
         - status
-
+    AnalyzeCodeBody:
+      type: object
+      properties:
+        code:
+          type: string
+          description: The code snippet to analyze
+        language:
+          type: string
+          description: Programming language (optional, will be auto-detected if omitted)
+      required:
+        - code
+    AnalyzeCodeResult:
+      type: object
+      properties:
+        language:
+          type: string
+          description: Detected or provided programming language
+        bug_description:
+          type: string
+          description: Description of the bug(s) found
+        fixed_code:
+          type: string
+          description: The corrected version of the code
+        root_cause_explanation:
+          type: string
+          description: Detailed explanation of the root cause
+        severity:
+          type: string
+          enum: [minor, major, critical]
+          description: Severity level of the bug
+        prevention_tip:
+          type: string
+          description: Tip on how to avoid this type of bug in the future
+        has_bugs:
+          type: boolean
+          description: Whether any bugs were detected
+      required:
+        - language
+        - bug_description
+        - fixed_code
+        - root_cause_explanation
+        - severity
+        - prevention_tip
+        - has_bugs
+    DetectLanguageBody:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Code snippet to detect language from
+      required:
+        - code
+    DetectLanguageResult:
+      type: object
+      properties:
+        language:
+          type: string
+          description: Detected programming language
+        confidence:
+          type: string
+          enum: [high, medium, low]
+      required:
+        - language
+        - confidence
+    DebugError:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error

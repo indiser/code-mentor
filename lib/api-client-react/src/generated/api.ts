@@ -5,18 +5,28 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import type {
+  MutationFunction,
   QueryFunction,
   QueryKey,
+  UseMutationOptions,
+  UseMutationResult,
   UseQueryOptions,
   UseQueryResult,
 } from "@tanstack/react-query";
 
-import type { HealthStatus } from "./api.schemas";
+import type {
+  AnalyzeCodeBody,
+  AnalyzeCodeResult,
+  DebugError,
+  DetectLanguageBody,
+  DetectLanguageResult,
+  HealthStatus,
+} from "./api.schemas";
 
 import { customFetch } from "../custom-fetch";
-import type { ErrorType } from "../custom-fetch";
+import type { ErrorType, BodyType } from "../custom-fetch";
 
 type AwaitedInput<T> = PromiseLike<T> | T;
 
@@ -99,3 +109,176 @@ export function useHealthCheck<
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
+
+/**
+ * Sends code to AI, returns bug detection, fix, explanation, severity, and prevention tip
+ * @summary Analyze code for bugs using AI
+ */
+export const getAnalyzeCodeUrl = () => {
+  return `/api/debug/analyze`;
+};
+
+export const analyzeCode = async (
+  analyzeCodeBody: AnalyzeCodeBody,
+  options?: RequestInit,
+): Promise<AnalyzeCodeResult> => {
+  return customFetch<AnalyzeCodeResult>(getAnalyzeCodeUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(analyzeCodeBody),
+  });
+};
+
+export const getAnalyzeCodeMutationOptions = <
+  TError = ErrorType<DebugError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof analyzeCode>>,
+    TError,
+    { data: BodyType<AnalyzeCodeBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof analyzeCode>>,
+  TError,
+  { data: BodyType<AnalyzeCodeBody> },
+  TContext
+> => {
+  const mutationKey = ["analyzeCode"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof analyzeCode>>,
+    { data: BodyType<AnalyzeCodeBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return analyzeCode(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type AnalyzeCodeMutationResult = NonNullable<
+  Awaited<ReturnType<typeof analyzeCode>>
+>;
+export type AnalyzeCodeMutationBody = BodyType<AnalyzeCodeBody>;
+export type AnalyzeCodeMutationError = ErrorType<DebugError>;
+
+/**
+ * @summary Analyze code for bugs using AI
+ */
+export const useAnalyzeCode = <
+  TError = ErrorType<DebugError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof analyzeCode>>,
+    TError,
+    { data: BodyType<AnalyzeCodeBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof analyzeCode>>,
+  TError,
+  { data: BodyType<AnalyzeCodeBody> },
+  TContext
+> => {
+  return useMutation(getAnalyzeCodeMutationOptions(options));
+};
+
+/**
+ * @summary Auto-detect programming language from code snippet
+ */
+export const getDetectLanguageUrl = () => {
+  return `/api/debug/detect-language`;
+};
+
+export const detectLanguage = async (
+  detectLanguageBody: DetectLanguageBody,
+  options?: RequestInit,
+): Promise<DetectLanguageResult> => {
+  return customFetch<DetectLanguageResult>(getDetectLanguageUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(detectLanguageBody),
+  });
+};
+
+export const getDetectLanguageMutationOptions = <
+  TError = ErrorType<DebugError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof detectLanguage>>,
+    TError,
+    { data: BodyType<DetectLanguageBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof detectLanguage>>,
+  TError,
+  { data: BodyType<DetectLanguageBody> },
+  TContext
+> => {
+  const mutationKey = ["detectLanguage"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof detectLanguage>>,
+    { data: BodyType<DetectLanguageBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return detectLanguage(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DetectLanguageMutationResult = NonNullable<
+  Awaited<ReturnType<typeof detectLanguage>>
+>;
+export type DetectLanguageMutationBody = BodyType<DetectLanguageBody>;
+export type DetectLanguageMutationError = ErrorType<DebugError>;
+
+/**
+ * @summary Auto-detect programming language from code snippet
+ */
+export const useDetectLanguage = <
+  TError = ErrorType<DebugError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof detectLanguage>>,
+    TError,
+    { data: BodyType<DetectLanguageBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof detectLanguage>>,
+  TError,
+  { data: BodyType<DetectLanguageBody> },
+  TContext
+> => {
+  return useMutation(getDetectLanguageMutationOptions(options));
+};
