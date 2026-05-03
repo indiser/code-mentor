@@ -4,7 +4,7 @@ import { AnalyzeCodeBody, DetectLanguageBody } from "@workspace/api-zod";
 
 const router = Router();
 
-const MODEL = process.env.GEMINI_MODEL ?? "gemini-1.5-flash";
+const MODEL = process.env.GEMINI_MODEL ?? "gemini-2.5-flash";
 
 const DEBUG_SYSTEM_PROMPT = `You are a senior software engineer and expert debugger with 20+ years of experience across multiple programming languages. Your job is to analyze code submitted by developers and provide structured, educational feedback.
 
