@@ -693,11 +693,11 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
 ## 📞 Contact
 
-**Your Name** - [@yourtwitter](https://twitter.com/yourtwitter)
+**Your Name** - [indiser](indiser01@gmail.com)
 
-**Project Link**: [https://github.com/yourusername/code-mentor-ai](https://github.com/yourusername/code-mentor-ai)
+**Project Link**: [https://github.com/indiser/code-mentor](https://github.com/yourusername/code-mentor)
 
-**Live Demo**: [https://code-mentor-ai.replit.app](https://code-mentor-ai.replit.app)
+**Live Demo**: [https://code-mentor-debugger.vercel.app/](https://code-mentor-debugger.vercel.app/)
 
 ---
 
